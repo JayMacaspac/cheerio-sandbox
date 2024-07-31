@@ -334,6 +334,17 @@ const formatDate = (e, a) => {
 
 // }).get()
 
+function getTeamNameTranslations(home_team_name, away_team_name, teamData) {
+    return {
+        home: home_team_name,
+        away: away_team_name
+    }
+}
+
+const teamData = {}
+const siteID = 1
+const siteName = "sandbox"
+
 // roma-italy.com
 function extract(html) {
   // return object with extracted values              
@@ -341,7 +352,7 @@ function extract(html) {
 
   let leagueName = ""
   let dateTime = ""
-
+    
 
   return $("div.game > div.title, .bet-items > li").map((e, a) => {
     let data = {}
@@ -372,7 +383,52 @@ function extract(html) {
     }
       
 
-  }).get()
+  }).get().reduce((rows, item) => {
+    const { home_team, away_team } = item
+      const home_team_name = home_team.replace(/\([^)]+\)|\[[^\]]+\]/g, '').trim()
+      const away_team_name = away_team.replace(/\([^)]+\)|\[[^\]]+\]/g, '').trim()
+
+    if (rows.find(
+      (row) => row.league_name == item.league_name && row.date == item.date && row.home_team == home_team_name  && row.away_team == away_team_name
+    )) {
+      return rows.map((row) => {
+        if (row.league_name == item.league_name && row.date == item.date && row.home_team == home_team_name && row.away_team == away_team_name) {
+          row.odds.push({
+            type: item.type,
+            home: parseFloat(item.home),
+            point: item.point,
+            away: parseFloat(item.away),
+          });
+        }
+        return row;
+      });
+    } else {
+      const translation = getTeamNameTranslations(home_team_name, away_team_name, teamData)
+      return [
+        ...rows,
+        {
+            league_name: item.league_name,
+            date: item.date,
+            home_team: home_team_name,
+            english_home_team: translation.home,
+            away_team: away_team_name,
+            english_away_team: translation.away,
+            site_id: siteID,
+            sport: item.sport,
+            site_name: siteName,
+            odds: [
+              {
+                type: item.type,
+                home: parseFloat(item.home),
+                point: item.point,
+                away: parseFloat(item.away),
+              }
+            ]
+        }
+      ];
+      
+    }
+  }, []);
 }
 
 // change the html value to the site you want to scrape 
