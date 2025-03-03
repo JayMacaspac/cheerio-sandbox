@@ -1,5 +1,5 @@
-## npm install
-## npm run start
+`npm install`
+`npm run start`
 
 ## How to use
 1. Run `npm run start` to start the server. This will open a new tab at `http://localhost:1234`.
