@@ -1,3 +1,4 @@
+## npm install
 ## npm run start
 
 ## How to use
